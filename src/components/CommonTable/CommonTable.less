@@ -1,0 +1,106 @@
+.explain_text{
+	height : 12px;
+	line-height : 12px;
+	margin-bottom : 20px;
+}
+:global{
+    .common_table{
+        position : relative;
+        margin : 0 auto;
+        height : calc( ~'100% - 68px - 70px' );
+    }
+    .common_table .ant-table-bordered .ant-table-thead > tr > th,
+	.ant-table-bordered .ant-table-tbody > tr > td{
+		border-right-width : 0;
+	}
+	.common_table .ant-table-bordered .ant-table-thead > tr > th:last-child,
+	.ant-table-bordered .ant-table-tbody > tr > td:last-child{
+		border-right-width : 1px;
+	}
+    .common_table .ant-table-bordered .ant-table-thead > tr > th{
+		background-color: rgb(240, 242, 245);
+        padding : 14px 16px;
+        text-align : center;
+        color : #111;
+		font-size : 15px;
+    }
+    .common_table .ant-table-body{ border-bottom : 1px solid #ddd; }
+    .common_table .ant-table-tbody > tr{
+		&:nth-child(odd){ background-color : #fff; }
+        &:nth-child(even){ background-color : rgba(176, 192, 200, 0.15); }
+    }
+    .common_table .ant-table-tbody > tr > td{
+		border-bottom-width : 0;
+		border-color : #ddd;
+		text-align : center;
+        height : 40px;
+		position : relative;
+        padding : 0;
+	}
+	.common_table .ant-table-tbody > tr > td > a, .common_table .ant-table-body tr > td > span,
+	.common_table .ant-table-tbody > tr > td >span, .common_table .ant-table-body > tr > td > a{
+		position : absolute;
+		top : 7px;
+		left : 16px;
+		display : inline-block;
+		width : calc( ~'100% - 32px' );
+		text-overflow : ellipsis;
+		white-space : nowrap;
+		overflow : hidden;
+	}
+    .ant-table-bordered .ant-table-header > table{
+        border : none;
+    }
+    .common_table .ant-table .ant-table-content .ant-table-thead .ant-table-selection-column,
+	.common_table .ant-table .ant-table-content .ant-table-body .ant-table-selection-column,
+	.ant-table-tbody > tr > td.ant-table-selection-column{
+		width : 50px;
+		min-width : 50px;
+		padding : 0 8px;
+	}
+    .common_table .ant-table-placeholder{
+        background : #f3f3f3;
+        border : 1px solid #d2d2d2 !important;
+        border-top : 0 !important;
+        border-radius : 0 0 10px 10px;
+        background : #fff;
+        margin-top : -1px;
+    }
+    .common_table_set_item_check_box{
+		width : 180px;
+        max-height : 350px;
+        overflow-y : auto;
+	}
+	.common_table_set_item_check_box .ant-checkbox-wrapper{
+		display : -webkit-flex;
+        display : flex;
+        flex-wrap : nowrap;
+        align-items : center;
+		padding : 7px 8px;
+        margin-left : 8px;
+	}
+    .common_table_set_item_check_box .ant-checkbox{
+        top : 0;
+    }
+	.common_table .ant-table-fixed-header .ant-table-scroll .ant-table-header{
+		margin-bottom : -8px !important;
+	}
+	.ant-table-fixed-header > .ant-table-content > .ant-table-scroll > .ant-table-body{
+		overflow : auto !important;  //设置表格 滚动
+	}
+	/*滚动条样式*/
+	::-webkit-scrollbar { /*滚动条整体样式*/
+		width : 2px;     /*高宽分别对应横竖滚动条的尺寸*/
+		height : 8px;
+	}
+	::-webkit-scrollbar-thumb { /*滚动条里面小方块*/
+		border-radius: 4px;
+//		-webkit-box-shadow: inset 0 0 5px rgba( 0,0,0,0.1 );
+		background-color: rgba(0,0,0,0.2);
+	}
+	::-webkit-scrollbar-track { /*滚动条里面轨道*/
+		-webkit-box-shadow : inset 0 0 5px rgba( 0,0,0,0.1 );
+		border-radius : 0;
+		background : rgba(0,0,0,0.1);
+	}
+}
