@@ -24,7 +24,7 @@ export default {
 	history: 'hash',
     proxy : {
 		"/crm": {
-			"target": "http://192.168.10.155:7087/",
+			"target": "http://192.168.30.22:3000/",
 			"changeOrigin": true,
 			"pathRewrite": { "^/crm" : "" }
 		}

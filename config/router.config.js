@@ -20,6 +20,11 @@ export default [
                 routes : [
                     { path : '/activity/awardSet', component : './activity/awardSet/page' }
                 ]
+            },{
+                path : '/react',
+                routes : [
+                    { path : '/react/renderProps', component : './react/renderProps/page' }
+                ]
             }
 		]
 	}

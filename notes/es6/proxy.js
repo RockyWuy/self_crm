@@ -351,3 +351,46 @@ function Tree(){
     return new Proxy({}, handler1);
 }
 let tree = Tree();
+
+//handler.getPrototypeOf()：在读取代理对象的原型时触发该操作，比如在执行Object.getPrototypeOf(proxy)时
+//handler.setPrototypeOf()：在设置代理对象的原型时触发该操作，比如在执行Object.setprototypeOf(proxy, null)时
+//handler.isExtensible()：在判断一个代理对象是否是可扩展时触发该操作，比如在执行Object.isExtensible(proxy)时
+//handler.preventExtensions()：在让一个代理对象不可扩展时触发该操作，比如在执行Object.preventExtensions(proxy)时
+//handler.getOwnPropertyDescriptor()：在获取代理对象某个属性的属性描述时触发该操作，比如在执行Object.getOwnPropertyDescriptor(proxy, 'foo')时
+//handler.defineProperty()：在定义代理对象某个属性时的属性描述时触发该操作，比如在执行Object.defineProperty(proxy,'foo',{})时
+//handler.has()：在判断代理对象是否拥有某个属性时触发该操作，比如在执行'foo' in proxy时
+//handler.get()：在读取代理对象的某个属性时触发该操作，比如在执行proxy.foo时
+//handler.set()：在给代理对象的某个赋值时触发该操作，比如在执行proxy.foo = 1时
+//handler.deleteProperty()：在删除代理对象的某个属性时触发该操作，比如在执行delete proxy.foo时
+//handler.ownKeys()：在获取代理对象的所有属性键时触发该操作，比如在执行Object.getOwnPropertyNames(proxy)时
+//handler.apply()：在调用一个目标对象为函数的代理对象时触发该操作，比如在执行proxy()时
+//handler.construct()：在给一个目标对象为构造函数的代理对象构造实例时触发该操作，比如在执行new proxy()时
+
+/*以没有经过任何优化的计算斐波那契数列的函数来假设为开销很大的方法，这种递归调用在计算 40 以上的斐波那契项时就能明显的感到延迟感。
+希望通过缓存来改善。*/
+const getFib = (number) => {
+    if (number <= 2) {
+        return 1;
+    } else {
+        return getFib(number - 1) + getFib(number - 2);
+    }
+}
+const getCacheProxy = (fn, cache = new Map()) => {
+    return new Proxy(fn,{
+        apply(target, context, args){
+            console.log( target, context, args );
+            let argsString = args.join(' ');
+            if( cache.has(argsString) ){
+                //如果有缓存, 直接返回缓存数据
+                console.log(`输出${args}的缓存结果:${cache.get(argsString)}`);
+                return cache.get( argsString );
+            }
+            let result = Reflect.apply(target, undefined, args);
+            cache.set( argsString, result );
+            return result;
+        }
+    })
+}
+const getFibProxy = getCacheProxy(getFib);
+getFibProxy(40); // 102334155
+getFibProxy(40); // 输出40的缓存结果: 102334155
