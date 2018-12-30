@@ -1,0 +1,72 @@
+Javascript 面向对象编程(一) : 封装
+http://www.ruanyifeng.com/blog/2010/05/object-oriented_javascript_encapsulation.html
+	构造函数模式
+	为了解决从原型对象生成实例的问题, Javascript提供了一个构造函数(Constructor)模式。
+	所谓"构造函数", 其实就是一个普通函数, 但是内部使用了this变量; 对构造函数使用new运算符, 就能生成实例, 并且this变量会绑定在实例对象上。
+
+Javascript 面向对象编程(一) : 构造函数的继承
+	比如, 现在有一个"动物"对象的构造函数。
+	function Animal(){
+		this.species = "动物";
+	}
+	还有一个"猫"对象的构造函数。
+	function Cat(name, color){
+		this.name = name;
+		this.color = color;
+　　}
+
+	1、构造函数绑定
+		使用call或apply方法，将父对象的构造函数绑定在子对象上, 即在子对象构造函数中加一行;
+		******不会继承Animal原型对象的方法和属性******
+		function Animal(){
+			this.species = "动物";
+		}
+		function Cat( name, color ){
+			Animal.apply( this, arguments );   //仅改变this指向
+			this.name = name;
+			this.color = color;
+		}
+		var cat1 = new Cat('大毛', '黄色');
+		console.log(cat1.species); //动物
+	2、prototype模式
+		Cat.prototype = new Animal();           //Cat.prototype变为Animal实例; 则它的constructor将指向Animal;
+		Cat.prototype.constructor = Cat;        //将constructor手动调回指向Cat; 不然会导致继承链的紊乱
+		var cat1 = new Cat("大毛", "黄色");
+		alert(cat1.species); // 动物
+
+	3、直接继承prototype
+		Cat.prototype = Animal.prototype;
+		Cat.prototype.constructor = Cat;        //将Animal.prototype.constructor也改变成了Cat
+		var cat1 = new Cat("大毛", "黄色");
+		alert(cat1.species); // 动物
+		与前一种方法相比, 这样做的优点是效率比较高(不用执行和建立Animal的实例了), 比较省内存;
+		缺点是Cat.prototype和Animal.prototype现在指向了同一个对象,那么任何对Cat.prototype的修改, 都会反映到Animal.prototype
+
+	4、利用空对象作为中介
+		var F = function(){};
+		F.prototype = Animal.prototype;
+		Cat.prototype = new F();
+		Cat.prototype.constructor = Cat;
+		F是空对象, 所以几乎不占内存。这时, 修改Cat的prototype对象, 就不会影响到Animal的prototype对象
+		封装函数 :
+		function extend(Child, Parent) {
+			var F = function(){};
+			F.prototype = Parent.prototype;
+			Child.prototype = new F();
+			Child.prototype.constructor = Child;
+			Child.uber = Parent.prototype;
+		}
+
+	5、
+		function Animal( props ){
+			this.species = "动物";
+		}
+		function Cat( props ){
+			Animal.apply( this, props );
+			this.name = name;
+			this.color = color;
+		}
+		Cat.prototype = new Animal();
+		Cat.prototype.constructor = Cat;        //将constructor手动调回指向Cat; 不然会导致继承链的紊乱
+		var cat1 = new Cat("大毛", "黄色");
+		alert(cat1.species); // 动物

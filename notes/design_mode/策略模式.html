@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>让球动起来</title>
+		<style>
+			#circle{
+				width : 30px;
+				height : 30px;
+				border-radius : 50%;
+			}
+		</style>
+	</head>
+	<body>
+		<div id = "circle" style = "left : 100px; position : absolute; background : blue"></div>
+	</body>
+	<script>
+//		4个参数的含义分别是动画已消耗的时间、小球原始位置、距离、动画持续的总时间,返回的值则是动画元素应该处在的当前位置
+		var tween = {
+			linear: function( t, b, c, d ){
+				return c*t/d + b;
+			},
+			easeIn: function( t, b, c, d ){
+				return c * ( t /= d ) * t + b;
+			},
+			strongEaseIn: function(t, b, c, d){
+				return c * ( t /= d ) * t * t * t * t + b;
+			},
+			strongEaseOut: function(t, b, c, d){
+				return c * ( ( t = t / d - 1) * t * t * t * t + 1 ) + b;
+			},
+			sineaseIn: function( t, b, c, d ){
+				return c * ( t /= d) * t * t + b;
+			},
+			sineaseOut: function(t,b,c,d){
+				return c * ( ( t = t / d - 1) * t * t + 1 ) + b;
+			}
+		};
+//		定义Animate 类, Animate 的构造函数接受一个参数: 即将运动起来的dom 节点
+		function Animate( dom ){
+			this.dom = dom;            //进行运动的dom节点
+			this.startTime = 0;		   //动画开始的时间
+			this.startPos = 0;         //动画开始时, dom节点的位置; 即dom的初始位置
+			this.endPos = 0;           //动画结束时, dom节点的位置; 即dom的目标位置
+			this.propertyName = null;  //dom节点需要被改变的css属性名
+			this.easing = null;        //缓动算法
+			this.duration = null;      //动画持续时间
+		}
+		Animate.prototype.start = function( propertyName, endPos, duration, easing ){
+			this.startTime = +new Date;     //动画启动时间
+			this.startPos = this.dom.getBoundingClientRect()[propertyName];
+			this.propertyName = propertyName;  //dom节点需要被改变的css属性名
+			this.endPos = endPos;
+			this.duration = duration;
+			this.easing = tween[ easing ];
+
+			let self = this;
+			let timer = setInterval(function(){
+				if( self.step() === false ){
+					clearInterval( timer );
+				}
+			}, 19)
+		}
+		Animate.prototype.step = function(){
+			var t = +new Date;     //取得当前时间
+			if( t >= this.startTime + this.duration ){
+				this.update( this.endPos );
+				return false;
+			}
+			//pos为小球的当前位置
+			let pos = this.easing( t - this.startTime, this.startPos, this.endPos - this.startPos, this.duration );
+			this.update( pos );   //更新小球的css属性值
+		}
+		Animate.prototype.update = function( pos ){
+			this.dom.style[this.propertyName] = pos + 'px';
+		}
+//		var div = document.getElementById( 'circle' );
+//		var animate = new Animate( div );
+//		animate.start( 'left', 500, 1000, 'strongEaseOut' );
+	</script>
+</html>

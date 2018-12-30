@@ -1,0 +1,57 @@
+
+preventDefault()、stopPropagation()、return false 之间的区别
+
+当你每次调用 "return false" 的时候, 它实际上做了3件事情：
+	1 event.preventDefault();      //阻止浏览器默认行为
+	2 event.stopPropagation();     //阻止事件冒泡(经测试未阻止冒泡事件)??
+	3 停止回调函数执行并立即返回;
+结论 ： 不要轻易的使用return false;
+
+stopImmediatePropagation()
+这个方法会停止一个事件继续执行, 即使当前的对象上还绑定了其它处理函数, 所有绑定在一个对象上的事件会按绑定顺序执行
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Document</title>
+	</head>
+	<body>
+		<div class="post1">
+			<h2><a class = 'title1' href="http://jb51.net">My Page</a></h2>
+			<div class="content">
+				Teaser text...
+			</div>
+		</div>
+		<div class="post2">
+			<h2><a class = 'title2' href="http://jb51.net">My Other Page</a></h2>
+			<div class="content">
+				Teaser text...
+			</div>
+		</div>
+	</body>
+	<script>
+		let post1 = document.getElementsByClassName('post1')[0];
+		let post2 = document.getElementsByClassName('post2')[0];
+		let title1 = document.getElementsByClassName('title1')[0];
+		let title2 = document.getElementsByClassName('title2')[0];
+
+		post1.onclick = function(){
+			console.log( 'post1' );
+		}
+		title1.onclick = function(e){
+			console.log('title1');
+//			e.preventDefault();
+//			e.stopPropagation();
+			return false;
+		}
+
+		post2.onclick = function(){
+			console.log('post2');
+		}
+		title2.onclick = function(e){
+			console.log('title2');
+			e.stopPropagation();
+		}
+	</script>
+</html>

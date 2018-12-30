@@ -1,0 +1,21 @@
+React
+	1 生命周期函数:
+		constructor
+		getDerivedStateFromProps
+		shouldComponentUpdate
+		render
+		getSnapshotBeforeUpdate
+		componentDidMount componentDidUpdate
+		componentWillUnmount
+	2 context:
+
+-- react v16.3
+	引入新的生命周期 getDerivedStateFromProps getSnapshotBeforeUpdate(尽量不使用);
+	-- getDerivedStateFromProps 将在props和state改变( mounting updating forceUpdate )过程中调用
+	-- getSnapshotBeforeUpdate 函数会在render之后执行, 而执行之时DOM元素还没有被更新, 给了一个机会去获取DOM信息, 计算得到一个snapshot, 这个snapshot会作为componentDidUpdate的第三个参数传入
+		componentDidUpdate(prevProps, prevState, snapshot) {
+			console.log('#enter componentDidUpdate snapshot = ', snapshot);
+		}
+	-- forceUpdate 不触发shouldComponentUpdate函数直接进行render
+react v17
+	--将弃用componentWillMount componentWillUpdate componentWillReceiveProps
