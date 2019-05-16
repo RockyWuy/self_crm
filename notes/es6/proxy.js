@@ -1,63 +1,208 @@
-//es6 代理proxy
+let obj = {}
+obj.a.b.c.d = 1;
+Reflect
 
-/*1、基本用法*/
-let target = { a : 1, b : 2 };
-let handler = {
-    get( target, key ){
-        let value = target[key];
-        console.log(`GET ${ key } - ${ value }`);
-        return value;
+// Proxy 可以理解成，在目标对象之前架设一层“拦截”，外界对该对象的访问，都必须先通过这层拦截，因此提供了一种机制，可以对外界的访问进行过滤和改写。Proxy 这个词的原意是代理，用在这里表示由它来“代理”某些操作，可以译为“代理器”
+
+// ES6原生提供 Proxy 构造函数，用来生成 Proxy 实例
+let proxy = new Proxy(target, handler);
+// Proxy 对象的所有用法，都是上面这种形式，不同的只是handler参数的写法。其中，new Proxy()表示生成一个Proxy实例，target参数表示所要拦截的目标对象，handler参数也是一个对象，用来定制拦截行为
+let proxy = new Proxy({}, {
+    get() {
+
+    },
+    set() {
+
+    },
+
+}) // handler是空对象，访问proxy等同于直接访问target对象
+
+/* Proxy 支持的拦截操作一览，一共 13 种 */
+// 拦截对象属性的读取，比如proxy.foo和proxy['foo']
+get(target, propKey, receiver)
+// 拦截对象属性的设置，比如proxy.foo = v或proxy['foo'] = v，返回一个布尔值
+set(target, propKey, value, receiver)
+// 拦截propKey in proxy的操作，返回一个布尔值
+has(target, propKey)
+// 拦截delete proxy[propKey]的操作，返回一个布尔值
+Reflect.deleteProperty(obj, 's')
+deleteProperty(target, propKey)
+// 拦截Object.getOwnPropertyNames(proxy)、Object.getOwnPropertySymbols(proxy)、Object.keys(proxy)、for...in循环，返回一个数组。该方法返回目标对象所有自身的属性的属性名，而Object.keys()的返回结果仅包括目标对象自身的可遍历属性
+ownKeys(target)
+// 拦截Object.getOwnPropertyDescriptor(proxy, propKey)，返回属性的描述对象
+getOwnPropertyDescriptor(target, propKey)
+// 拦截Object.defineProperty(proxy, propKey, propDesc）、Object.defineProperties(proxy, propDescs)，返回一个布尔值
+defineProperty(target, propKey, propDesc)
+// 拦截Object.preventExtensions(proxy)，返回一个布尔值
+preventExtensions(target)
+// 拦截Object.getPrototypeOf(proxy)，返回一个对象
+getPrototypeOf(target)
+// 拦截Object.isExtensible(proxy)，返回一个布尔值
+isExtensible(target)
+// 拦截Object.setPrototypeOf(proxy, proto)，返回一个布尔值。如果目标对象是函数，那么还有两种额外操作可以拦截
+setPrototypeOf(target, proto)
+// 拦截 Proxy 实例作为函数调用的操作，比如proxy(...args)、proxy.call(object, ...args)、proxy.apply(...)
+apply(target, object, args)
+// 拦截 Proxy 实例作为构造函数调用的操作，比如new proxy(...args)
+construct(target, args)
+
+/* get 实现数组读取负数的索引 */
+function createArray(...elements) {
+    let handler = {
+        get(target, propKey, receiever) {
+            console.log(target, propKey, receiever)
+            let index = Number(propKey)
+            if(index < 0) {
+                propKey = String(target.length + index)
+            }
+            return Reflect.get(target, propKey, receiever)
+        }
+    }
+    let target = []
+    target.push(...elements)
+    return new Proxy(target, handler)
+}
+let arr = createArray('a', 'b', 'c')
+arr[-1]
+
+/* set 使用proxy保证age的属性值符合要求 */
+let validator = {
+    set(target, propKey, value) {
+        if(propKey === 'age') {
+            if(!Number.isInteger(value)) {
+                throw new TypeError('The age is not an integer')
+            }
+            if(value > 200) {
+                throw new RangeError('The age seems invalid')
+            }
+        }
+        target[propKey] = value
     }
 }
+//let person = new Proxy({}, validator)
+//person.age = 100
+//person.age = 300
 
-let proxy = new Proxy( target, handler );
-console.log( proxy.a );
-console.log( proxy.c );
+/* apply实现拦截 */
+var target = function() {
+    return 'I am the target';
+}
+var handler = {
+    apply(target, ctx, params) {
+        if(params.length > 0) {
+            return 'I am the proxy'
+        }
+        return Reflect.apply(...arguments)
+    }
+}
+//var p = new Proxy(target, handler)
+//p()
+
+/* has隐藏某些属性 */
+// has拦截只对in运算符生效，对for...in循环不生效
+// hasOwnProperty可以用来检测一个对象是否含有特定的自身属性；和 in 运算符不同，该方法会忽略掉那些从原型链上继承到的属性
+var handler = {
+    has(target, key) {
+        if(key[0] === '_') {
+            return false
+        }
+        return key in target
+    }
+}
+//var target = { _prop: 'foo', prop: 'foo' }
+//var proxy = new Proxy(target, handler)
+//'_prop' in proxy
+
+/* deleteProperty拦截delete操作符 */
+var handler = {
+    deleteProperty(target, key) {
+        if(key[0] === '_') {
+            throw new Error(`Invalid attempt to delete private "${key}" property`)
+        }
+        Reflect.deleteProperty(target, key);
+        return true;
+    }
+}
+var target = { _prop: 'foo', prop: 'foo' }
+var proxy = new Proxy(target, handler);
+delete proxy._prop
+
+/* getOwnPropertyDescriptor方法拦截Object.getOwnPropertyDescriptor() */
+var handler = {
+    getOwnPropertyDescriptor(target, key) {
+        if(key[0] === '_') {
+            return;
+        }
+        return Object.getOwnPropertyDescriptor(target, key);
+    }
+};
+var target = { _foo: 'bar', baz: 'tar' };
+var proxy = new Proxy(target, handler);
+Object.getOwnPropertyDescriptor(proxy, 'wat')
+// undefined
+Object.getOwnPropertyDescriptor(proxy, '_foo')
+// undefined
+Object.getOwnPropertyDescriptor(proxy, 'baz')
+// { value: 'tar', writable: true, enumerable: true, configurable: true }
+
+/* ownKeys拦截第一个字符为下划线的属性名 */
+var target = {
+    _bar: 'foo',
+    _prop: 'bar',
+    prop: 'baz'
+}
+var handler = {
+    ownKeys(target) {
+        return Reflect.ownKeys(target).filter(key => key[0] !== '_')
+    }
+}
+var proxy = new Proxy(target, handler)
+for(let key of Object.keys(proxy)) {
+    console.log(target[key])
+}
 
 /*2、默认值*/
-function propDefaults( defaults ){
+function propDefaults(defaults){
     let handler = {
-        get( target, key ){
-            return Reflect.get( target, key ) || defaults[key]
+        get(target, key){
+            return Reflect.get(target, key) || defaults[key]
         }
     }
     return new Proxy({}, handler);
 }
 
-let myObj = propDefaults({ name : 'noname' });
+let myObj = propDefaults({ name: 'noname' });
 
 function log(){
     let isIn = 'name' in myObj ? 'is in' : 'is not in';
-    console.log( `name = ${myObj.name} ( name ${ isIn } myobj )`)
+    console.log(`name = ${myObj.name} ( name ${ isIn } myobj )`)
 }
-
 log();                // name = "noname" (name is not in myObj)
 myObj.name = 'Bob';
 log();                // name = "Bob" (name is in myObj)
 delete myObj.name;
 log();                // name = "noname" (name is not in myObj)
 
-/*3、隐藏私有属性*/
+/* 3、隐藏私有属性 */
 function privateProps(obj, filterFunc){
     let handler = {
-        get( target, key ){
-            if( !filterFunc(key) ){
-                let value = Reflect.get( target, key );
-                // auto-bind the methods to the original object, so they will have unrestricted access to it via 'this'
+        get(target, key) {
+            if(!filterFunc(key)){
+                let value = Reflect.get(target, key);
                 if( typeof value === 'function' ){
-                    value = value.bind( target );
+                    value = value.bind(target);
                 }
                 return value;
             }
         },
         set(target, key, value){
-            if(  filterFunc(key) ){
+            if(filterFunc(key)){
                 throw new TypeError(`can't set property ${key}`);
             }
-            return Reflect.set( target, key, value );
+            return Reflect.set(target, key, value);
         },
-        has( target, key ){
-            return filterFunc( key ) ? false : Reflect.has(target, key)
+        has(target, key){
+            return filterFunc(key) ? false : Reflect.has(target, key)
         },
         ownKeys(target){
             return Reflect.ownKeys(target).filter(prop => !filterFunc(prop))
@@ -66,16 +211,16 @@ function privateProps(obj, filterFunc){
             return filterFunc(key) ? undefined : Reflect.getOwnPropertyDescriptor(target, key);
         }
     }
-    return new Proxy( obj, handler );
+    return new Proxy(obj, handler);
 }
 
 function propFilter(key){
     return key.indexOf('_') === 0;
 }
 let myObj1 = {
-    _private : 'secret',
-    public : 'hello',
-    method : function(){
+    _private: 'secret',
+    public: 'hello',
+    method: function(){
         console.log( this._private );
     }
 }
@@ -89,165 +234,92 @@ console.log(Object.keys(myProxy));                  // ["public", "method"]
 for (let prop in myProxy) { console.log(prop); }    // public, method
 
 /*4、枚举*/
-function makeEnum( values ){
-    let handler = {
-        set( target, key, value ){
-            throw new TypeError('Enum is read only');
-        },
-        get( target, key ){
-            if( !(key in target ) ){
-                throw new ReferenceError(`unknown enum key ${key}`);
-            }
-            return Reflect.get( target, key );
-        },
-        deleteProperty( target, key ){
-            throw new TypeError('Enum is read only');
-        }
-    };
-    return new Proxy(values, handler);
-}
+//function makeEnum( values ){
+//    let handler = {
+//        set( target, key, value ){
+//            throw new TypeError('Enum is read only');
+//        },
+//        get( target, key ){
+//            if( !(key in target ) ){
+//                throw new ReferenceError(`unknown enum key ${key}`);
+//            }
+//            return Reflect.get( target, key );
+//        },
+//        deleteProperty( target, key ){
+//            throw new TypeError('Enum is read only');
+//        }
+//    };
+//    return new Proxy(values, handler);
+//}
+//
+//let someValue = 3;
+//// using a plain object as enum
+//console.log('Object');
+//const myObj2 = {ONE: 1, TWO: 2};
+//console.log(myObj2.ONE);       // 1 - ok
+//console.log(myObj2.TWWO);      // undefined - typos can lead to silent errors
+//if (myObj2.ONE = someValue) {  // this mistyped condition evaluates to true
+//    console.log(myObj2.ONE);   // 3 - and changes our enum too
+//}
+//delete myObj2.ONE;             // deleted
+//
+//// using a freezed object can prevent by Object.freeze)
+//console.log('Freezed object');
+//const myFrObj = Object.freeze({ONE: 1, TWO: 2});
+//console.log(myFrObj.ONE);       // 1 - ok
+//console.log(myFrObj.TWWO);      // undefined - typos can lead to silent errors
+//if (myFrObj.ONE = someValue) {  // still evaluates to true
+//    console.log(myFrObj.ONE);   // 1 - but at least the modification doesn't happen
+//}
+//delete myFrObj.ONE;             // no deletion, but no error either
+//
+//// using a proxy as enum
+//console.log('Proxy');
+//const MyEnum = makeEnum({ONE: 1, TWO: 2});
+//console.log(MyEnum.ONE);           // 1 - ok
+//try {
+//    console.log(MyEnum.TWWO);      // ReferenceError - typos catched immediately
+//} catch(ex) {
+//    console.error(ex);
+//}
+//try {
+//    if (MyEnum.ONE = someValue) {  // TypeError - can't be modified, doesn't evaluate, catched immediately
+//        console.log(MyEnum.ONE);   // (this line never executes)
+//    }
+//} catch(ex) {
+//    console.error(ex);
+//}
+//try {
+//    delete MyEnum.ONE;             // TypeError
+//} catch(ex) {
+//    console.error(ex);
+//}
 
-let someValue = 3;
-// using a plain object as enum
-console.log('Object');
-const myObj2 = {ONE: 1, TWO: 2};
-console.log(myObj2.ONE);       // 1 - ok
-console.log(myObj2.TWWO);      // undefined - typos can lead to silent errors
-if (myObj2.ONE = someValue) {  // this mistyped condition evaluates to true
-    console.log(myObj2.ONE);   // 3 - and changes our enum too
-}
-delete myObj2.ONE;             // deleted
-
-
-// using a freezed object can prevent by Object.freeze)
-console.log('Freezed object');
-const myFrObj = Object.freeze({ONE: 1, TWO: 2});
-console.log(myFrObj.ONE);       // 1 - ok
-console.log(myFrObj.TWWO);      // undefined - typos can lead to silent errors
-if (myFrObj.ONE = someValue) {  // still evaluates to true
-    console.log(myFrObj.ONE);   // 1 - but at least the modification doesn't happen
-}
-delete myFrObj.ONE;             // no deletion, but no error either
-
-// using a proxy as enum
-console.log('Proxy');
-const MyEnum = makeEnum({ONE: 1, TWO: 2});
-console.log(MyEnum.ONE);           // 1 - ok
-try {
-    console.log(MyEnum.TWWO);      // ReferenceError - typos catched immediately
-} catch(ex) {
-    console.error(ex);
-}
-try {
-    if (MyEnum.ONE = someValue) {  // TypeError - can't be modified, doesn't evaluate, catched immediately
-        console.log(MyEnum.ONE);   // (this line never executes)
-    }
-} catch(ex) {
-    console.error(ex);
-}
-try {
-    delete MyEnum.ONE;             // TypeError
-} catch(ex) {
-    console.error(ex);
-}
-
-/**/
-function trackChange( obj, onChange ){
-    let handler = {
-        set(target, key, value){
-            let oldVal = target[key];
-            Reflect.set( target, key, value );
-            onChange( target, key, oldVal, value );
-        },
-        deleteProperty( target, key ){
-            let oldVal = target[key];
-            Reflect.deleteProperty(target, key);
-            onChange(target, key, oldVal, undefined);
-        }
-    }
-    return new Proxy(target, handler);
-}
-
-/*使用特定属性 缓存TTL(生存时间)*/
-function cacheObj(ttlFunc){
-    let obj = {};
-    let handler = {
-        get( target, key ){
-            let data = Reflect.get( target, key );
-            if( data ){
-                return data.value
-            }
-        },
-        set( target, key, value ){
-            let data = {
-                ttl : ttlFunc(key),
-                value : value
-            }
-            return Reflect.set( target, key, data );
-        }
-    }
-    // decrease TTL and remove prop when it reaches zero
-    function invalidate(){
-        for( let key in obj ){
-            obj[key].ttl -= 1;
-            if( obj[key].ttl <= 0 ){
-                delete obj[key]
-            }
-        }
-    }
-    window.setInterval( invalidate, 1000 );
-    return new Proxy( obj, handler );
-}
-let cache = cacheObj((key) => 5);
-function log1( sec ){
-    console.log( `${sec}s : a=${cache.a}`)
-}
-cache.a = 123;
-for( let sec = 0; sec < 6; sec += 1){
-    window.setTimeout(() => log1(sec), sec * 1000);
-}
-
-/*Using the "in" operator like "includes"*/
-let arr = [1,2];
-1 in arr  //true
-4 in arr  //false
-arr.includes(1)   //true
-arr.includes(3)   //false
-arr.indexOf(1)    //0
-arr.indexOf(2)    //1
-arr.indexOf(3)    //-1
-
-/*利用proxy实现单例模式*/
+/* construct 利用proxy实现单例模式 */
 function makeSingleton(func){
     let instance;
     let handler = {
-        constructor : function(target, args){
+        constructor: function(target, args){
             if( !instance ){
                 instance = new func();
             }
             return instance;
         }
     }
-    return new Proxy( func, handler );
+    return new Proxy(func, handler);
 }
 // we will try it out on this constructor
 function Test() {
     this.value = 0;
 }
-// normal construction
-let t1 = new Test(),
-    t2 = new Test();
-t1.value = 123;
-console.log('Normal:', t2.value);  // 0 - because t1 and t2 are separate instances
-
 // using Proxy to trap construction, forcing singleton behaviour
-let TestSingleton = makeSingleton(Test),
-    s1 = new TestSingleton(),
-    s2 = new TestSingleton();
+let TestSingleton = makeSingleton(Test);
+let s1 = new TestSingleton();
+let s2 = new TestSingleton();
 s1.value = 123;
 console.log('Singleton:', s2.value);  // 123 - bcause s1 and s2 is the same instance
 
-/*类似Python的数组切片*/
+/* 类似Python的数组切片 */
 function pythonIndex(array){
     function parse(value, defaultValue, resolveNegative){
         if( value === undefined || isNaN(value)){
@@ -290,7 +362,7 @@ function pythonIndex(array){
     }
 
     let handler = {
-        get( arr, key ){
+        get(arr, key) {
             return slice( key ) || Reflect.get( arr, key );
         }
     }
@@ -300,73 +372,31 @@ function pythonIndex(array){
 let values = [0,1,2,3,4,5,6,7,8,9],
     pyValues = pythonIndex(values);
 
-console.log(JSON.stringify(values));
-
 pyValues['-1'];      // 9
 pyValues['0:3'];     // [0,1,2]
 pyValues['8:5:-1'];  // [8,7,6]
 pyValues['-8::-1'];  // [2,1,0]
 pyValues['::-1'];    // [9,8,7,6,5,4,3,2,1,0]
 pyValues['4::2'];    // [4,6,8]
-
 // and normal indexing still works
 pyValues[3];         // 3
 
 
-
-
-/*Schema 校验*/
-//person 是一个普通对象，包含一个 age 属性，当我们给它赋值的时候确保是大于零的数值，否则赋值失败并抛出异常
-let validator = {
-    set(target, key, value){
-        if( key === 'age' ){
-            if(typeof value !== 'number' || Number.isNaN(value)){
-                throw new TypeError('Age must be a number');
-            }
-            if( value <= 0 ){
-                throw new RangeError('Age must be a positive number');
-            }
-        }
-    }
-}
-var proxy2 = new Proxy({}, validator)
-proxy2.age = 'foo'
-// <- TypeError: Age must be a number
-proxy2.age = NaN
-// <- TypeError: Age must be a number
-proxy2.age = 0
-// <- TypeError: Age must be a positive number
-proxy2.age = 28
-
-/*自动填充对象*/
-let handler1 = {
-    get : function(target, key, receiver){
+/* 自动填充对象 */
+let handler = {
+    get: function(target, key, receiver){
         if(!(key in target)){
             target[key] = Tree();
         }
-        return Reflect.get( target, key, receiver );
+        return Reflect.get(...arguments);
     }
 }
 function Tree(){
-    return new Proxy({}, handler1);
+    return new Proxy({}, handler);
 }
 let tree = Tree();
 
-//handler.getPrototypeOf()：在读取代理对象的原型时触发该操作，比如在执行Object.getPrototypeOf(proxy)时
-//handler.setPrototypeOf()：在设置代理对象的原型时触发该操作，比如在执行Object.setprototypeOf(proxy, null)时
-//handler.isExtensible()：在判断一个代理对象是否是可扩展时触发该操作，比如在执行Object.isExtensible(proxy)时
-//handler.preventExtensions()：在让一个代理对象不可扩展时触发该操作，比如在执行Object.preventExtensions(proxy)时
-//handler.getOwnPropertyDescriptor()：在获取代理对象某个属性的属性描述时触发该操作，比如在执行Object.getOwnPropertyDescriptor(proxy, 'foo')时
-//handler.defineProperty()：在定义代理对象某个属性时的属性描述时触发该操作，比如在执行Object.defineProperty(proxy,'foo',{})时
-//handler.has()：在判断代理对象是否拥有某个属性时触发该操作，比如在执行'foo' in proxy时
-//handler.get()：在读取代理对象的某个属性时触发该操作，比如在执行proxy.foo时
-//handler.set()：在给代理对象的某个赋值时触发该操作，比如在执行proxy.foo = 1时
-//handler.deleteProperty()：在删除代理对象的某个属性时触发该操作，比如在执行delete proxy.foo时
-//handler.ownKeys()：在获取代理对象的所有属性键时触发该操作，比如在执行Object.getOwnPropertyNames(proxy)时
-//handler.apply()：在调用一个目标对象为函数的代理对象时触发该操作，比如在执行proxy()时
-//handler.construct()：在给一个目标对象为构造函数的代理对象构造实例时触发该操作，比如在执行new proxy()时
-
-/*以没有经过任何优化的计算斐波那契数列的函数来假设为开销很大的方法，这种递归调用在计算 40 以上的斐波那契项时就能明显的感到延迟感。
+/* 以没有经过任何优化的计算斐波那契数列的函数来假设为开销很大的方法，这种递归调用在计算 40 以上的斐波那契项时就能明显的感到延迟感。
 希望通过缓存来改善。*/
 const getFib = (number) => {
     if (number <= 2) {
@@ -376,17 +406,17 @@ const getFib = (number) => {
     }
 }
 const getCacheProxy = (fn, cache = new Map()) => {
-    return new Proxy(fn,{
+    return new Proxy(fn, {
         apply(target, context, args){
             console.log( target, context, args );
             let argsString = args.join(' ');
-            if( cache.has(argsString) ){
+            if( cache.has(argsString) ) {
                 //如果有缓存, 直接返回缓存数据
                 console.log(`输出${args}的缓存结果:${cache.get(argsString)}`);
                 return cache.get( argsString );
             }
             let result = Reflect.apply(target, undefined, args);
-            cache.set( argsString, result );
+            cache.set(argsString, result);
             return result;
         }
     })
