@@ -6,24 +6,25 @@
 
 export default [
 	{
-		path : '/user',
-		component : '../layouts/user/UserLayout',
+		path: '/user',
+		component: '../layouts/user/UserLayout',
 	},{
-		path : '/',
-		component : '../layouts/basic/BasicLayout',
-		routes : [
+		path: '/',
+		component: '../layouts/basic/BasicLayout',
+		routes: [
 			{
-                path : '/',
-                component : './index'
+                path: '/',
+                component: './index'
             },{
-                path : '/activity',
-                routes : [
-                    { path : '/activity/awardSet', component : './activity/awardSet/page' }
+                path: '/activity',
+                routes: [
+                    { path: '/activity/awardSet', component: './activity/awardSet/page' }
                 ]
             },{
-                path : '/react',
-                routes : [
-                    { path : '/react/renderProps', component : './react/renderProps/page' }
+                path: '/react',
+                routes: [
+                    { path: '/react/renderProps', component: './react/renderProps/page' },
+                    { path: '/react/audio', component: './react/audio/page' }
                 ]
             }
 		]

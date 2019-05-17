@@ -5,30 +5,29 @@
 */
 
 export default {
-	namespace : 'global',
+	namespace: 'global',
 
-	state : {
-
+	state: {
 		//sider
-		siderCollapsed : false,              //侧边栏是否折叠
-		menuOpenKeys : [],                   //打开的菜单
-		menuSelectedKeys : [],               //选中的菜单
+		siderCollapsed: false,              //侧边栏是否折叠
+		menuOpenKeys: [],                   //打开的菜单
+		menuSelectedKeys: [],               //选中的菜单
 	},
 
-	subscriptions : {
+	subscriptions: {
 		setup({ dispatch, history }){
 			history.listen(({ pathname, query }) => {
-				if ( pathname === '/') {
+				if (pathname === '/') {
 				}
 			});
 		}
 	},
 
-	effects : {
+	effects: {
 	},
 
-	reducers : {
-		updateState( state, action){
+	reducers: {
+		updateState(state, action){
 			return {
 				...state,
 				...action.payload
