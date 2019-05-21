@@ -67,21 +67,21 @@ class Audio extends React.Component{
     }
 
     draw1 = (array) => {
-        this.ctx.clearRect(0, 0, this.width, this.state.baseY)
+        this.ctx.clearRect(0, 0, this.width, this.height) // this.state.baseY)
         // array长度为1024, 总共取10个关键点, 关键点左右两边各取5个点作为过渡, 波浪更自然
         let waveArr1 = [],  waveArr2 = [], waveTemp = [], leftTemp = [], rightTemp = [], waveStep = 20, leftStep = 70, rightStep = 90
         //事先定好要取的点的key,相比下面直接循环整个数组来说效率高很多。
-        let waveStepArr = [0, 51, 102, 153, 204, 255, 306, 357, 408];
+        let waveStepArr = [0, 51, 102, 153, 204, 255, 306, 357, 408, 495];
         let leftStepArr = [70, 141, 212, 283, 354];
         let rightStepArr = [90, 181, 272, 363, 454];
         waveStepArr.map((key) => {
-            waveTemp.push(array[key] / 2.6);
+            waveTemp.push(array[key] / 2);
         });
         leftStepArr.map((key) => {
-            leftTemp.unshift(Math.floor(array[key] / 4.8));
+            leftTemp.unshift(Math.floor(array[key] / 4));
         });
         rightStepArr.map((key) => {
-            rightTemp.push(Math.floor(array[key] / 4.8));
+            rightTemp.push(Math.floor(array[key] / 4));
         });
         // array.map((data, k) => {
         //     if(waveStep == 50 && waveTemp.length < 9) {
@@ -110,44 +110,41 @@ class Audio extends React.Component{
         waveArr2.map((data, k) => {
             waveArr2[k] = data * 1.8;
         });
-        let waveWidth = Math.ceil(this.width / (waveArr1.length - 1));
-        let waveWidth2 =  Math.ceil(this.width / (waveArr2.length - 1));
-        this.ctx.beginPath()
-        this.ctx.fillStyle = 'red' // 'rgba(102,102,102,0.4)'
-        this.ctx.moveTo(-waveWidth * 2, this.state.baseY - waveArr1[0])
-        for( let i = 1; i < waveArr2.length - 2; i++ ) {
-            let p0 = {x: (i - 2) * waveWidth, y: waveArr1[i - 1]};
-            let p1 = {x: (i - 1) * waveWidth, y: waveArr1[i]};
-            let p2 = {x: (i) * waveWidth, y: waveArr1[i + 1]};
-            let p3 = {x: (i + 1) * waveWidth, y: waveArr1[i + 2]};
-
-            for(let j = 0; j < 100; j ++) {
-                let t = j * (1.0 / 100);
-                let tt = t * t;
-                let ttt = tt * t;
-                let CGPoint ={};
-                CGPoint.x = 0.5 * (2*p1.x+(p2.x-p0.x)*t + (2*p0.x-5*p1.x+4*p2.x-p3.x)*tt + (3*p1.x-p0.x-3*p2.x+p3.x)*ttt);
-                CGPoint.y = 0.5 * (2*p1.y+(p2.y-p0.y)*t + (2*p0.y-5*p1.y+4*p2.y-p3.y)*tt + (3*p1.y-p0.y-3*p2.y+p3.y)*ttt);
-                this.ctx.lineTo(CGPoint.x, this.state.baseY - CGPoint.y);
-            }
-            this.ctx.lineTo(p2.x, this.state.baseY - p2.y);
+        let waveWidth = Math.ceil(this.width / (waveArr1.length - 2));
+        let waveWidth2 =  Math.ceil(this.width / (waveArr2.length - 2));
+//        this.ctx.beginPath()
+//        this.ctx.fillStyle = 'rgba(102,102,102,0.4)'
+//        this.ctx.moveTo(-waveWidth2, this.state.baseY - waveArr2[0])
+//        this.ctx.moveTo(-waveWidth2, this.state.baseY)
+//        for( let i = 0; i < waveArr2.length - 3; i+=3 ) {
+//            let p1 = {x: i * waveWidth2, y: this.state.baseY - waveArr2[i]}
+//            let p2 = {x: (i + 1) * waveWidth2, y: this.state.baseY - waveArr2[i+1]}
+//            let p3 = {x: (i + 2) * waveWidth2, y: this.state.baseY - waveArr2[i+2]}
+//            this.ctx.quadraticCurveTo( p1x, p1y, p2x, p2y )
+//            this.ctx.bezierCurveTo( p1.x, p1.y, p2.x, p2.y, p3.x, p3.y )
+//            this.ctx.lineTo(p2.x, p2.y)
 //            this.ctx.lineTo(i * waveWidth2, this.state.baseY - waveArr2[i])
-        }
-        this.ctx.lineTo((waveArr1.length) * waveWidth, this.baseY - waveArr1[waveArr1.length - 1])
-        this.ctx.lineTo(this.width + waveWidth * 2, this.state.baseY);
-        this.ctx.lineTo(this.width + waveWidth * 2, this.height);
-        this.ctx.lineTo(-2 * waveWidth, this.height);
+//        }
 //        this.ctx.lineTo(this.width, this.state.baseY)
-        this.ctx.fill()
+//        this.ctx.lineTo(this.width, this.height)
+//        this.ctx.lineTo(0, this.height)
+//        this.ctx.moveTo(-waveWidth2, this.state.baseY - waveArr2[0])
+//        this.ctx.fill()
 
         this.ctx.beginPath()
         this.ctx.fillStyle = 'rgba(102,102,102, 0.8)'
-        this.ctx.moveTo(0, this.state.baseY)
-        for( let i = 0; i < waveArr1.length; i++ ) {
-            this.ctx.lineTo(i * waveWidth, this.state.baseY - waveArr1[i])
+        this.ctx.moveTo(-waveWidth, this.state.baseY - waveArr1[0])
+        for( let i = 0; i < waveArr1.length - 2; i+=2 ) {
+//            this.ctx.lineTo(i * waveWidth, this.state.baseY - waveArr1[i])
+            let p1 = {x: i * waveWidth, y: this.state.baseY - waveArr1[i]}
+            let p2 = {x: (i + 1) * waveWidth, y: this.state.baseY - waveArr1[i+1]}
+            let p3 = {x: (i + 2) * waveWidth, y: this.state.baseY - waveArr1[i+2]}
+//            this.ctx.quadraticCurveTo( p1x, p1y, p2x, p2y )
+            this.ctx.bezierCurveTo( p1.x, p1.y, p2.x, p2.y, p3.x, p3.y )
         }
-
-        this.ctx.lineTo(this.width, this.state.baseY)
+        this.ctx.lineTo(this.width, this.height)
+        this.ctx.lineTo(0, this.height)
+        this.ctx.moveTo(-waveWidth, this.state.baseY - waveArr1[0])
         this.ctx.fill()
 
     }
