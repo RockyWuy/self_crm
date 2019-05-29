@@ -7,15 +7,15 @@ Reflect
 // ES6原生提供 Proxy 构造函数，用来生成 Proxy 实例
 let proxy = new Proxy(target, handler);
 // Proxy 对象的所有用法，都是上面这种形式，不同的只是handler参数的写法。其中，new Proxy()表示生成一个Proxy实例，target参数表示所要拦截的目标对象，handler参数也是一个对象，用来定制拦截行为
+
 let proxy = new Proxy({}, {
-    get() {
-
+    get(target, key) {
     },
-    set() {
+    set(target, key, value) {
+    }
+})
 
-    },
-
-}) // handler是空对象，访问proxy等同于直接访问target对象
+// handler是空对象，访问proxy等同于直接访问target对象
 
 /* Proxy 支持的拦截操作一览，一共 13 种 */
 // 拦截对象属性的读取，比如proxy.foo和proxy['foo']
@@ -98,20 +98,21 @@ var handler = {
 //var p = new Proxy(target, handler)
 //p()
 
-/* has隐藏某些属性 */
 // has拦截只对in运算符生效，对for...in循环不生效
 // hasOwnProperty可以用来检测一个对象是否含有特定的自身属性；和 in 运算符不同，该方法会忽略掉那些从原型链上继承到的属性
-var handler = {
+/* has隐藏某些属性 */
+let handler = {
     has(target, key) {
         if(key[0] === '_') {
             return false
         }
-        return key in target
+        return Reflect.has(target, key)
     }
 }
-//var target = { _prop: 'foo', prop: 'foo' }
-//var proxy = new Proxy(target, handler)
-//'_prop' in proxy
+var target = { _prop: 'foo', prop: 'foo' }
+var proxy = new Proxy(target, handler)
+'_prop' in proxy // false
+'prop' in proxy // true
 
 /* deleteProperty拦截delete操作符 */
 var handler = {
@@ -296,79 +297,72 @@ for (let prop in myProxy) { console.log(prop); }    // public, method
 //}
 
 /* construct 利用proxy实现单例模式 */
-function makeSingleton(func){
+function makeSingleton(fn){
     let instance;
     let handler = {
         constructor: function(target, args){
-            if( !instance ){
-                instance = new func();
+            if(!instance) {
+                instance = new fn();
             }
             return instance;
         }
     }
-    return new Proxy(func, handler);
+    return new Proxy(fn, handler);
 }
-// we will try it out on this constructor
 function Test() {
     this.value = 0;
 }
-// using Proxy to trap construction, forcing singleton behaviour
+// 使用代理来拦截构造方法，强制执行单例行为
 let TestSingleton = makeSingleton(Test);
 let s1 = new TestSingleton();
 let s2 = new TestSingleton();
-s1.value = 123;
-console.log('Singleton:', s2.value);  // 123 - bcause s1 and s2 is the same instance
+s1.value = 123; // 更改s1中value属性值
+console.log('Singleton:', s2.value);  // Singleton: 123
 
 /* 类似Python的数组切片 */
 function pythonIndex(array){
     function parse(value, defaultValue, resolveNegative){
-        if( value === undefined || isNaN(value)){
+        if(value === undefined || isNaN(value)) {
             value = defaultValue;
-        } else if( resolveNegative && value < 0 ){
+        } else if(resolveNegative && value < 0) {
             value += array.length;
         }
         return value;
     }
-
-    function slice( key ){
-        if(typeof key === 'string' && key.match(/^[+-\d:]+$/)){
-            // no ':', return a single item
-            if(key.indexOf(':') === -1){
+    function slice(key) {
+        if(typeof key === 'string' && key.match(/^[+-\d:]+$/)) {
+            if(key.indexOf(':') === -1) { // 不存在 ':', 直接返回
                 let index = parse(parseInt(key), 0, true);
                 console.log(key, '\t\t', array[index]);
                 return array[index];
             }
-            // otherwise: parse the slice string
             let [start, end, step] = key.split(':').map(part => parseInt(part));
             step = parse(step, 1, false);
-            if( step === 0 ){
+            if(step === 0) {
                 throw new RangeError(`step can't be zero`);
             }
-            if( step > 0 ){
+            if(step > 0) {
                 start = parse(start, 0, true);
                 end = parse(end, array.length, true);
-            } else{
+            } else {
                 start = parse(start, array.length-1, true);
                 end = parse(end, -1, true)
             }
             let result = [];
-            for( let i = start; start <= end ? i < end : i > end; i+= step ){
+            for(let i = start; start <= end ? i < end : i > end; i+= step) {
                 result.push(array[i]);
             }
-            console.log( key, '\t', JSON.stringify(result) );
-            console.log('lll', result );
             return result;
         }
     }
 
     let handler = {
         get(arr, key) {
-            return slice( key ) || Reflect.get( arr, key );
+            return slice(key) || Reflect.get(arr, key);
         }
     }
     return new Proxy(array, handler);
 }
-// try it out
 let values = [0,1,2,3,4,5,6,7,8,9],
     pyValues = pythonIndex(values);
 
@@ -378,7 +372,6 @@ pyValues['8:5:-1'];  // [8,7,6]
 pyValues['-8::-1'];  // [2,1,0]
 pyValues['::-1'];    // [9,8,7,6,5,4,3,2,1,0]
 pyValues['4::2'];    // [4,6,8]
-// and normal indexing still works
 pyValues[3];         // 3
 
 
@@ -395,6 +388,7 @@ function Tree(){
     return new Proxy({}, handler);
 }
 let tree = Tree();
+tree.a.b.c.d = 1;
 
 /* 以没有经过任何优化的计算斐波那契数列的函数来假设为开销很大的方法，这种递归调用在计算 40 以上的斐波那契项时就能明显的感到延迟感。
 希望通过缓存来改善。*/
@@ -418,7 +412,7 @@ const getCacheProxy = (fn, cache = new Map()) => {
             let result = Reflect.apply(target, undefined, args);
             cache.set(argsString, result);
             return result;
-        }
+//        }
     })
 }
 const getFibProxy = getCacheProxy(getFib);
