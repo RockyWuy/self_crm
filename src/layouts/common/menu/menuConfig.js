@@ -4,4 +4,5 @@ export const menuArrs = [
 	{ pId: '0', id: '2', key: '/react', name: 'react' },
 	{ pId: '2', id: '2_1', key: '/renderProps', name: 'renderProps' },
 	{ pId: '2', id: '2_2', key: '/audio', name: 'audio' },
+	{ pId: '2', id: '2_3', key: '/swiper', name: 'swiper' },
 ]

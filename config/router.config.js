@@ -24,7 +24,8 @@ export default [
                 path: '/react',
                 routes: [
                     { path: '/react/renderProps', component: './react/renderProps/page' },
-                    { path: '/react/audio', component: './react/audio/page' }
+                    { path: '/react/audio', component: './react/audio/page' },
+                    { path: '/react/swiper', component: './react/swiper/page' }
                 ]
             }
 		]
