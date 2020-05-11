@@ -20,6 +20,13 @@
     "umi": "^2.1.2",
     "umi-plugin-react": "^1.1.1"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm test",
+      "pre-push": "npm test",
+      "...": "..."
+    }
+  },
   "lint-staged": {
     "*.{js,jsx}": [
       "eslint --fix",

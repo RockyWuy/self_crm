@@ -3,9 +3,9 @@
  * @Date: 2018-11-12 12:02:05
  * @Description:
  * @LastEditors: rockyWu
- * @LastEditTime: 2020-05-11 17:42:31
+ * @LastEditTime: 2020-05-11 17:46:31
  */
-export const dva = { 
+export const dva = {
   config: {
     onError(err) {
       err.preventDefault();
