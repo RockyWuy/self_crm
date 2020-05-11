@@ -3,7 +3,7 @@
  * @Date: 2018-11-12 12:02:05
  * @Description:
  * @LastEditors: rockyWu
- * @LastEditTime: 2020-05-11 17:54:15
+ * @LastEditTime: 2020-05-11 17:59:58
  */
 export const dva = {
   config: {
