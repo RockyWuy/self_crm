@@ -1,11 +1,11 @@
 /*
  * @Author: rockyWu
  * @Date: 2018-11-12 12:02:05
- * @Description: 
+ * @Description:
  * @LastEditors: rockyWu
- * @LastEditTime: 2020-05-11 17:39:52
+ * @LastEditTime: 2020-05-11 17:42:31
  */
-export const dva = {
+export const dva = { 
   config: {
     onError(err) {
       err.preventDefault();
