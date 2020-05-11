@@ -1,37 +1,36 @@
 /*
-* @author Rocky wu
-* Date by 2018/11/13
-* 全局model
-*/
+ * @author Rocky wu
+ * Date by 2018/11/13
+ * 全局model
+ */
 
 export default {
-	namespace: 'global',
+  namespace: 'global',
 
-	state: {
-		//sider
-		siderCollapsed: false,              //侧边栏是否折叠
-		menuOpenKeys: [],                   //打开的菜单
-		menuSelectedKeys: [],               //选中的菜单
-	},
+  state: {
+    //sider
+    siderCollapsed: false, //侧边栏是否折叠
+    menuOpenKeys: [], //打开的菜单
+    menuSelectedKeys: [], //选中的菜单
+  },
 
-	subscriptions: {
-		setup({ dispatch, history }){
-			history.listen(({ pathname, query }) => {
-				if (pathname === '/') {
-				}
-			});
-		}
-	},
+  subscriptions: {
+    setup({ dispatch, history }) {
+      history.listen(({ pathname, query }) => {
+        if (pathname === '/') {
+        }
+      });
+    },
+  },
 
-	effects: {
-	},
+  effects: {},
 
-	reducers: {
-		updateState(state, action){
-			return {
-				...state,
-				...action.payload
-			}
-		}
-	}
-}
+  reducers: {
+    updateState(state, action) {
+      return {
+        ...state,
+        ...action.payload,
+      };
+    },
+  },
+};
