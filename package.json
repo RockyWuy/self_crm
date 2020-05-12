@@ -1,13 +1,22 @@
 {
   "private": true,
   "scripts": {
+    "analyze": "source-map-explorer dist/2.async.js",
     "start": "umi dev",
     "build": "umi build",
     "test": "umi test",
-    "lint": "eslint --ext .js src mock tests"
+    "lint": "eslint --ext .js src mock tests",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "devDependencies": {
+    "@babel/core": "^7.9.6",
+    "@storybook/addon-actions": "^5.3.18",
+    "@storybook/addon-links": "^5.3.18",
+    "@storybook/addons": "^5.3.18",
+    "@storybook/react": "^5.3.18",
     "babel-eslint": "^9.0.0",
+    "babel-loader": "^8.1.0",
     "eslint": "^5.4.0",
     "eslint-config-umi": "^0.1.5",
     "eslint-plugin-flowtype": "^2.50.0",
@@ -35,6 +44,7 @@
   "dependencies": {
     "husky": "^4.2.5",
     "react": "^16.8.0",
-    "react-dom": "^16.8.0"
+    "react-dom": "^16.8.0",
+    "source-map-explorer": "^2.4.2"
   }
 }
