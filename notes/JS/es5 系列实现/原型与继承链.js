@@ -1,26 +1,26 @@
 // 一、普通对象和函数对象
 
 // 二、构造函数
-	function Person( name, age ){
-		this.name = name;
-		this.age = age;
-	}
-	let person = new Person('kobe', 40);
-	console.log( person.constructor === Person ); //true
-	// 实例的构造函数属性(constructor)指向构造函数
+function Person(name, age) {
+  this.name = name;
+  this.age = age;
+}
+let person = new Person('kobe', 40);
+console.log(person.constructor === Person); //true
+// 实例的构造函数属性(constructor)指向构造函数
 
 // 三、原型对象
-	// 其中每个函数对象都有一个 prototype 属性, 这个属性指向函数的 原型对象(obj.prototype)
-	// 每个对象都有 __proto__ 属性, 但只有函数对象才有 prototype 属性
-	// console.log( Person.prototype.constructor === Person );  //true
-	// 原型对象(Person.prototype)是 构造函数(Person)的一个实例.
+// 其中每个函数对象都有一个 prototype 属性, 这个属性指向函数的 原型对象(obj.prototype)
+// 每个对象都有 __proto__ 属性, 但只有函数对象才有 prototype 属性
+// console.log( Person.prototype.constructor === Person );  //true
+// 原型对象(Person.prototype)是 构造函数(Person)的一个实例.
 
 // 四、__proto__
-	// JS 在创建对象(不论是普通对象还是函数对象)的时候, 都有一个叫做__proto__ 的内置属性, 用于指向创建它的构造函数的原型对象
-	// console( person.__proto__ === Person.prototype );        //true
+// JS 在创建对象(不论是普通对象还是函数对象)的时候, 都有一个叫做__proto__ 的内置属性, 用于指向创建它的构造函数的原型对象
+// console( person.__proto__ === Person.prototype );        //true
 
 // 五、构造器
-	// Object, Array, Function, Date, Number, String, Boolean
+// Object, Array, Function, Date, Number, String, Boolean
 
 // 六、原型链
 // 	1 person.__proto__ 是什么?
