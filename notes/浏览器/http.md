@@ -3,7 +3,7 @@
  * @Date: 2020-05-22 09:48:58
  * @Description: 
  * @LastEditors: rockyWu
- * @LastEditTime: 2020-05-22 11:17:21
+ * @LastEditTime: 2020-07-03 16:32:56
 --> 
 
 > 用户输入url按下回车到页面出现 发生了什么？
@@ -47,3 +47,10 @@ if-Modified-Since Modified 只能精确到 s，优先级低于 Etag
 * GET 请求可以被缓存；POST 不可以
 * GET 对数据长度有限制，当发送数据时，GET 方法向 URL 添加数据； URL 的长度是受限制的（最大长度 2048 个字符）。POST 无限制
 * GET 只允许 ASCII 字符；POST 无限制
+
+> HTTP2
+* http2 采用二进制分帧的方式进行通信，而 http1 是用文本; http2 效率更高
+* http2 可以进行多路复用，即同一个域名通信，只需要一个 TCP 建立请求通道，请求与响应同时基于此通道进行
+双向通信
+* http2 可以头部压缩
+* http2 可以进行服务端推送

@@ -1,100 +1,99 @@
 import React from 'react';
 
-let RouterClosure = (function(){
-	let routers = {};
-	let listenEvents = [];
+let RouterClosure = (function() {
+  let routers = {};
+  let listenEvents = [];
 
-	function Router(props){
-		let { className , style , children } = props;
-		return(
-			<div className = { className } style = { style }>
-				{ children }
-			</div>
-		)
-	}
+  function Router(props) {
+    let { className, style, children } = props;
+    return (
+      <div className={className} style={style}>
+        {children}
+      </div>
+    );
+  }
 
-	//执行所有的路由事件
-	function callListen(path){
-		if(listenEvents && listenEvents.length > 0){
-			for(let i = 0 ; i < listenEvents.length ; i++){
-				listenEvents[i](path);
-			}
-		}
-	}
+  //执行所有的路由事件
+  function callListen(path) {
+    if (listenEvents && listenEvents.length > 0) {
+      for (let i = 0; i < listenEvents.length; i++) {
+        listenEvents[i](path);
+      }
+    }
+  }
 
-	class Route extends React.Component{
-		constructor(props){
-			super(props);
-			this.state = {
-				returnItem : [],
-				callback : [],
-			}
-		}
-		componentDidMount(){
-			this._initRouter();
-			window.addEventListener('load', () => this._changeReturn());
-			window.addEventListener('hashchange', () => this._changeReturn());
-		}
+  class Route extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+        returnItem: [],
+        callback: [],
+      };
+    }
+    componentDidMount() {
+      this._initRouter();
+      window.addEventListener('load', () => this._changeReturn());
+      window.addEventListener('hashchange', () => this._changeReturn());
+    }
 
-		_initRouter(){
-			let { path , component } = this.props;
-			if(!routers[path]){
-				routers[path] = [];
-			}
-			routers[path].push(component);
-		}
+    _initRouter() {
+      let { path, component } = this.props;
+      if (!routers[path]) {
+        routers[path] = [];
+      }
+      routers[path].push(component);
+    }
 
-		_changeReturn(){
-			let hash = window.location.hash;
-			//防止url中有参数干扰监听
-			if(hash.indexOf('?') > -1){
-				hash = hash.substring(0, hash.indexOf('?'));
-			}
-			let { path } = this.props;
-			//当前路由是选中路由时加载当前组件
-			if(hash === path && routers[hash] && routers[hash].length > 0){
-				let renderItem = [];
-				for(let i = 0 ; i < routers[hash].length ; i++){
-					//如果组件参数的方法，则执行并push
-					//如果组件参数是DOM，则直接渲染
-					if(typeof routers[hash][i] === 'function'){
-						renderItem.push(routers[hash][i]())
-					}else{
-						renderItem.push(routers[hash][i])
-					}
-				}
-				this.setState({ renderItem }, () => callListen(path));
-			}else{
-				this.setState({ renderItem : [] })
-			}
-		}
+    _changeReturn() {
+      let hash = window.location.hash;
+      //防止url中有参数干扰监听
+      if (hash.indexOf('?') > -1) {
+        hash = hash.substring(0, hash.indexOf('?'));
+      }
+      let { path } = this.props;
+      //当前路由是选中路由时加载当前组件
+      if (hash === path && routers[hash] && routers[hash].length > 0) {
+        let renderItem = [];
+        for (let i = 0; i < routers[hash].length; i++) {
+          //如果组件参数的方法，则执行并push
+          //如果组件参数是DOM，则直接渲染
+          if (typeof routers[hash][i] === 'function') {
+            renderItem.push(routers[hash][i]());
+          } else {
+            renderItem.push(routers[hash][i]);
+          }
+        }
+        this.setState({ renderItem }, () => callListen(path));
+      } else {
+        this.setState({ renderItem: [] });
+      }
+    }
 
-		render(){
-			let { renderItem } = this.state;
-			return(
-				<React.Fragment>
-					{ renderItem }
-				</React.Fragment>
-			)
-		}
-	}
+    render() {
+      let { renderItem } = this.state;
+      return <React.Fragment>{renderItem}</React.Fragment>;
+    }
+  }
 
-	function dispatchRouter({ path = '' , query = {} }){
-		let queryStr = [];
-		for(let i in query){
-			queryStr.push(i + '=' + query[i]);
-		}
-		window.location.href = `${path}?${queryStr.join('&')}`
-	}
+  function dispatchRouter({ path = '', query = {} }) {
+    let queryStr = [];
+    for (let i in query) {
+      queryStr.push(i + '=' + query[i]);
+    }
+    window.location.href = `${path}?${queryStr.join('&')}`;
+  }
 
-	function listen(fn){
-		listenEvents.push(fn);
-	}
+  function listen(fn) {
+    listenEvents.push(fn);
+  }
 
-	return{
-		Router , Route , dispatchRouter , listen
-	}
-})()
+  return {
+    Router,
+    Route,
+    dispatchRouter,
+    listen,
+  };
+})();
 
 export default RouterClosure;
 
